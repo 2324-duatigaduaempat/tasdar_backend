@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>TAS.DAR Coach Chat</title>
+  <style>
+    body{font:16px/1.4 system-ui,Arial;margin:40px;max-width:720px}
+    textarea{width:100%;height:100px}
+    button{padding:10px 16px;margin-top:8px}
+    .bubble{background:#f5f7ff;border:1px solid #e6e9ff;padding:12px;border-radius:10px;margin:10px 0}
+  </style>
+</head>
+<body>
+  <h2>TAS.DAR Coach Chat</h2>
+  <div class="bubble">Sebut sesuatu… aku dengar.</div>
+  <textarea id="prompt" placeholder="Tulis mesej di sini..."></textarea><br/>
+  <button onclick="send()">Hantar</button>
+  <div id="out"></div>
+
+<script>
+async function send(){
+  const prompt = document.getElementById('prompt').value.trim();
+  if(!prompt) return;
+  document.getElementById('out').innerHTML += `<div class="bubble"><b>Kamu:</b> ${prompt}</div>`;
+  document.getElementById('prompt').value = '';
+  const res = await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({prompt})});
+  const data = await res.json();
+  document.getElementById('out').innerHTML += `<div class="bubble"><b>TAS.DAR:</b> ${data.reply || '(tiada balasan)'} </div>`;
+}
+</script>
+</body>
+</html>

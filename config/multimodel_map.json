@@ -1,0 +1,9 @@
+{
+  "providers": {
+    "gpt":       {"enabled": true,  "model": "gpt-4o-mini", "max_tokens": 512, "temperature": 0.3},
+    "claude":    {"enabled": true,  "model": "claude-3-5-sonnet-202410", "max_tokens": 512, "temperature": 0.2},
+    "perplex":   {"enabled": false, "model": "pplx-70b-online", "max_tokens": 400, "temperature": 0.1},
+    "synthetic": {"enabled": true,  "model": "tasdar-synthetic", "max_tokens": 280, "temperature": 0.0}
+  },
+  "strategies": { "single": "", "compare": "", "fusion": "" }
+}

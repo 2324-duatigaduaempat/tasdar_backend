@@ -1,0 +1,6 @@
+﻿.env
+*.zip
+__pycache__/
+*.pyc
+.runtime_logs/
+.vscode/

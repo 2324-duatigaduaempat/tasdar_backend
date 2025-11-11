@@ -1,0 +1,91 @@
+<section id="ethic-sigil" style="display:grid;place-items:center;gap:8px;">
+  <svg id="sigil" width="240" height="240" viewBox="0 0 240 240">
+    <!-- Ring Etika (12 segmen) -->
+    <g id="ring-ethics" transform="translate(120,120)"></g>
+    <!-- Ring Resonance (10 titik) -->
+    <g id="ring-res" transform="translate(120,120)"></g>
+    <!-- Logo TD / pusat -->
+    <circle cx="120" cy="120" r="26" fill="#111"/>
+    <text x="120" y="124" text-anchor="middle" font-size="14" fill="#fff">TD</text>
+  </svg>
+  <div id="ethic-legend" style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;font-size:12px;"></div>
+</section>
+
+<script>
+async function loadEthicState(){
+  const res = await fetch(`${BACKEND_BASE}/ethic`);
+  const data = await res.json();
+
+  const ethicG = document.getElementById('ring-ethics');
+  const resG   = document.getElementById('ring-res');
+  ethicG.innerHTML = '';
+  resG.innerHTML = '';
+
+  // 12 Etika - segmen arc
+  const n=12, R=80, r=60, cx=0, cy=0;
+  for(let i=0;i<n;i++){
+    const start = (i/n)*2*Math.PI - Math.PI/2;
+    const end   = ((i+1)/n)*2*Math.PI - Math.PI/2;
+    const large = (end-start)>Math.PI?1:0;
+
+    const outerStart = [cx+R*Math.cos(start), cy+R*Math.sin(start)];
+    const outerEnd   = [cx+R*Math.cos(end),   cy+R*Math.sin(end)];
+    const innerEnd   = [cx+r*Math.cos(end),   cy+r*Math.sin(end)];
+    const innerStart = [cx+r*Math.cos(start), cy+r*Math.sin(start)];
+
+    const d = [
+      `M ${outerStart[0]} ${outerStart[1]}`,
+      `A ${R} ${R} 0 ${large} 1 ${outerEnd[0]} ${outerEnd[1]}`,
+      `L ${innerEnd[0]} ${innerEnd[1]}`,
+      `A ${r} ${r} 0 ${large} 0 ${innerStart[0]} ${innerStart[1]}`,
+      'Z'
+    ].join(' ');
+
+    const e = data.ethics[i];
+    const active = e.active ? 1 : 0.25;
+    const hue = Math.round((i/n)*360);
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d', d);
+    path.setAttribute('fill', `hsla(${hue} 70% 50% / ${Math.max(0.25, e.value)})`);
+    path.setAttribute('stroke', `hsla(${hue} 70% 20% / ${active})`);
+    path.setAttribute('stroke-width','1');
+    ethicG.appendChild(path);
+  }
+
+  // 10 Resonansi di luar (α..κ) sebagai bulatan hidup
+  const codes = data.resonance;
+  const m = codes.length, RR=100;
+  for(let i=0;i<m;i++){
+    const ang = (i/m)*2*Math.PI - Math.PI/2;
+    const x = RR * Math.cos(ang);
+    const y = RR * Math.sin(ang);
+    const dot = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    dot.setAttribute('cx', x);
+    dot.setAttribute('cy', y);
+    dot.setAttribute('r', 6 + 6 * codes[i].value);
+    dot.setAttribute('fill', `hsla(210 80% 60% / ${0.35 + 0.65*codes[i].value})`);
+    resG.appendChild(dot);
+
+    const label = document.createElementNS('http://www.w3.org/2000/svg','text');
+    label.setAttribute('x', x);
+    label.setAttribute('y', y-12);
+    label.setAttribute('text-anchor','middle');
+    label.setAttribute('font-size','10');
+    label.setAttribute('fill','#9aa4b2');
+    label.textContent = codes[i].code;
+    resG.appendChild(label);
+  }
+
+  // Legend ringkas (optional)
+  const legend = document.getElementById('ethic-legend');
+  legend.innerHTML = data.ethics.map(e => 
+    `<span style="padding:2px 6px;border:1px solid #333;border-radius:10px;opacity:${e.active?1:0.5}">
+      ${e.code}
+     </span>`
+  ).join('');
+}
+
+// Panggil on load + refresh interval (cth: tiap 15s)
+setInterval(loadEthicState, 15000);
+loadEthicState();
+</script>
